@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import torch
-from utils import Meters
+from ..utils import Meters
 import time
 from itertools import chain
 
