@@ -10,7 +10,7 @@ import operator
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-def make_dataset_and_loader(
+def make_dataset(
     is_CV,
     train_df,
     train_idx,
@@ -19,33 +19,27 @@ def make_dataset_and_loader(
     image_label_column,
     phase,
     batch_size,
+    train_tfms,
+    valid_tfms
 ):
     if is_CV:
         train_dataset = CVDataset(
-            train_df, train_idx, image_path_column, image_label_column, transform=None
+            train_df, train_idx, image_path_column, image_label_column, transform=train_tfms
         )
 
         valid_dataset = CVDataset(
-            train_df, val_idx, image_path_column, image_label_column, transform=None
+            train_df, val_idx, image_path_column, image_label_column, transform=valid_tfms
         )
     else:
         train_dataset = Dataset.SimpleDataset(
-            args.image_path_column, args.image_label_column, transform=None
+            image_path_column, image_label_column, transform=None
         )
 
         valid_dataset = Dataset.SimpleDataset(
-            args.image_path_column, args.image_label_column, transform=None
+            image_path_column, image_label_column, transform=None
         )
 
-    train_loader = DataLoader.SimpleDataLoader()(
-        dataset=train_dataset, batch_size=batch_size, shuffle=True, phase=phase
-    )
-
-    val_loader = DataLoader.SimpleDataLoader()(
-        dataset=valid_dataset, batch_size=batch_size, shuffle=True, phase=phase
-    )
-
-    return train_dataset, train_loader, valid_dataset, val_loader
+    return train_dataset, valid_dataset
 
 
 class SimpleDataset(Dataset):

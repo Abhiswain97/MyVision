@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
+import albumentations as A
 from itertools import chain
 
 from MyVision.dataset import Dataset
@@ -16,7 +17,29 @@ import torch
 
 def main(args):
     train_df = pd.read_csv(args.csv_file)
+
+    model = CNN.NeuralNet(output_features=1)
+    loss = nn.BCELoss()
+
+    train_tfms = A.Compose(
+        [
+            A.RandomResizedCrop(224, 224),
+            A.Flip(always_apply=True),
+            A.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ]
+    )
+
+    val_tfms = A.Compose(
+        [
+            A.RandomResizedCrop(224, 224),
+            A.Flip(always_apply=False),
+            A.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ]
+    )
+
     if args.folds:
+
+        best_loss = 100
         for fold, (train_idx, val_idx) in enumerate(
             StratifiedKFold(n_splits=args.folds, random_state=42).split(
                 train_df[args.image_path_column], train_df[args.image_label_column]
@@ -27,35 +50,37 @@ def main(args):
                 for phase in ["train", "valid"]:
 
                     print(f"[FOLD {fold}] [EPOCH {epoch}] [PHASE {phase}]")
-                    (
-                        train_dataset,
-                        train_loader,
-                        valid_dataset,
-                        val_loader,
-                    ) = Dataset.make_dataset_and_loader(
+                    (train_dataset, valid_dataset,) = Dataset.make_dataset(
                         is_CV=True,
                         train_df=train_df,
                         train_idx=train_idx,
                         val_idx=val_idx,
-                        image_path_column=image_path_column,
-                        image_label_column=image_label_column,
+                        image_path_column=args.image_path_column,
+                        image_label_column=args.image_label_column,
+                        train_tfms=train_tfms,
+                        val_tfms=val_tfms,
                     )
 
-                    model = CNN.NeuralNet(output_features=2)
+                    train_loader = DataLoader.SimpleDataLoader(
+                        train_dataset, batch_size=args.batch_size
+                    )
+                    val_loader = DataLoader.SimpleDataLoader(
+                        valid_dataset, batch_size=args.batch_size
+                    )
 
                     engine = Engine.Engine(
                         train_loader=train_loader,
                         val_loader=val_loader,
                         test_loader=None,
                         device=args.device,
-                        loss=nn.BCELoss(),
+                        loss=loss,
                         model=model,
                     )
 
                     if phase == "train":
                         engine.train()
 
-                    elif phase == "valid":
+                    if phase == "valid":
                         preds, avg_loss = engine.valid()
 
                         if avg_loss < best_loss:
@@ -67,28 +92,24 @@ def main(args):
             for phase in ["train", "valid"]:
                 print(f"[EPOCH {epoch}] [PHASE {phase}]")
 
-                (
-                    train_dataset,
-                    train_loader,
-                    valid_dataset,
-                    val_loader,
-                ) = Dataset.make_dataset_and_loader(
+                (train_dataset, valid_dataset,) = Dataset.make_dataset(
                     is_CV=True,
                     train_df=train_df,
                     train_idx=train_idx,
                     val_idx=val_idx,
-                    image_path_column=image_path_column,
-                    image_label_column=image_label_column,
+                    image_path_column=args.image_path_column,
+                    image_label_column=args.image_label_column,
                 )
-                model = CNN.NeuralNet(output_features=2)
 
                 engine = Engine.Engine(
-                    train_loader=train_loader,
-                    val_loader=val_loader,
+                    train_loader=args.train_loader,
+                    val_loader=args.val_loader,
                     test_loader=None,
                     device=args.device,
-                    loss=nn.BCELoss(),
+                    loss=loss,
                     model=model,
+                    train_tfms=train_tfms,
+                    val_tfms=val_tfms,
                 )
 
                 if phase == "train":
