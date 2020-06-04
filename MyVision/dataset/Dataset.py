@@ -17,8 +17,6 @@ def make_dataset(
     val_idx,
     image_path_column,
     image_label_column,
-    phase,
-    batch_size,
     train_tfms,
     valid_tfms
 ):
@@ -32,11 +30,11 @@ def make_dataset(
         )
     else:
         train_dataset = Dataset.SimpleDataset(
-            image_path_column, image_label_column, transform=None
+            image_path_column, image_label_column, transform=train_tfms
         )
 
         valid_dataset = Dataset.SimpleDataset(
-            image_path_column, image_label_column, transform=None
+            image_path_column, image_label_column, transform=valid_tfms
         )
 
     return train_dataset, valid_dataset

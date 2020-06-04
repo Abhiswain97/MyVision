@@ -71,7 +71,6 @@ class Engine:
             outputs = self.model(images)
 
             loss = self.loss(outputs, targets)
-            loss.backward()
 
             losses.update(val=loss.item(), n=images.size(0))
 

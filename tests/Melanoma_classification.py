@@ -13,6 +13,8 @@ from MyVision.model import CNN
 
 import torch.nn as nn
 import torch
+from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import StepLR
 
 
 def main(args):
@@ -20,6 +22,8 @@ def main(args):
 
     model = CNN.NeuralNet(output_features=1)
     loss = nn.BCELoss()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     train_tfms = A.Compose(
         [
@@ -58,14 +62,14 @@ def main(args):
                         image_path_column=args.image_path_column,
                         image_label_column=args.image_label_column,
                         train_tfms=train_tfms,
-                        val_tfms=val_tfms,
+                        valid_tfms=val_tfms,
                     )
 
-                    train_loader = DataLoader.SimpleDataLoader(
-                        train_dataset, batch_size=args.batch_size
+                    train_loader = DataLoader(
+                        train_dataset, batch_size=args.batch_size, shuffle=True
                     )
-                    val_loader = DataLoader.SimpleDataLoader(
-                        valid_dataset, batch_size=args.batch_size
+                    val_loader = DataLoader(
+                        valid_dataset, batch_size=args.batch_size, shuffle=False
                     )
 
                     engine = Engine.Engine(
@@ -75,6 +79,7 @@ def main(args):
                         device=args.device,
                         loss=loss,
                         model=model,
+                        optimizer=optimizer
                     )
 
                     if phase == "train":
