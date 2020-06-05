@@ -17,3 +17,14 @@ OR
 
 Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 
+
+```
+@misc{MyVision,
+    author = {Swain, Abhishek},
+    title = {Everything I love about PyTorch},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/Abhiswain97/MyVision}},
+}
+```
