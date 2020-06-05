@@ -6,10 +6,8 @@ from sklearn.model_selection import StratifiedKFold
 import albumentations as A
 from itertools import chain
 
-from MyVision.dataset import Dataset
-from MyVision.dataloader import DataLoader
+from MyVision.dataset.Dataset import make_dataset
 from MyVision.engine import Engine
-from MyVision.model import CNN
 
 import torch.nn as nn
 import torch
@@ -18,6 +16,7 @@ from torch.optim.lr_scheduler import StepLR
 
 
 def main(args):
+    global best_loss
     train_df = pd.read_csv(args.csv_file)
 
     model = CNN.NeuralNet(output_features=1)
@@ -54,7 +53,7 @@ def main(args):
                 for phase in ["train", "valid"]:
 
                     print(f"[FOLD {fold}] [EPOCH {epoch}] [PHASE {phase}]")
-                    (train_dataset, valid_dataset,) = Dataset.make_dataset(
+                    (train_dataset, valid_dataset,) = make_dataset(
                         is_CV=True,
                         train_df=train_df,
                         train_idx=train_idx,
@@ -97,24 +96,31 @@ def main(args):
             for phase in ["train", "valid"]:
                 print(f"[EPOCH {epoch}] [PHASE {phase}]")
 
-                (train_dataset, valid_dataset,) = Dataset.make_dataset(
-                    is_CV=True,
+                (train_dataset, valid_dataset,) = make_dataset(
+                    is_CV=False,
                     train_df=train_df,
-                    train_idx=train_idx,
-                    val_idx=val_idx,
+                    train_idx=None,
+                    val_idx=None,
                     image_path_column=args.image_path_column,
                     image_label_column=args.image_label_column,
+                    train_tfms=train_tfms,
+                    valid_tfms=val_tfms,
+                )
+
+                train_loader = DataLoader(
+                    train_dataset, batch_size=args.batch_size, shuffle=True
+                )
+                val_loader = DataLoader(
+                    valid_dataset, batch_size=args.batch_size, shuffle=False
                 )
 
                 engine = Engine.Engine(
-                    train_loader=args.train_loader,
-                    val_loader=args.val_loader,
+                    train_loader=train_loader,
+                    val_loader=val_loader,
                     test_loader=None,
                     device=args.device,
                     loss=loss,
                     model=model,
-                    train_tfms=train_tfms,
-                    val_tfms=val_tfms,
                 )
 
                 if phase == "train":
