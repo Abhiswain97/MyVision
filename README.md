@@ -17,6 +17,9 @@ OR
 
 Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 
+## Citation
+
+Please use this bibtex if you want to cite this repository in your publications:
 
 ```
 @misc{MyVision,
