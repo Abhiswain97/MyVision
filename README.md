@@ -1,6 +1,7 @@
 [![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision)
 [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision)
 # MyVision: Eveything I love about PyTorch
+
 <br>
 
 My goal is to make my DL work-flow simple and "Do more with less code".
