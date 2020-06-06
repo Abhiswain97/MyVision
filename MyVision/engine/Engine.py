@@ -84,7 +84,7 @@ class Trainer:
 
             losses.update(val=loss.item(), n=images.size(0))
 
-        return (np.array(list(predictions)), np.array(list(gts)), losses.avg)
+        return np.array(list(predictions)), np.array(list(gts)), losses.avg
 
     def fit(self, epochs, metric):
 
