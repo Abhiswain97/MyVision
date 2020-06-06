@@ -2,10 +2,6 @@
 [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision)
 
 # MyVision: Eveything I love about PyTorch
-<p align="center">
-    <img align="center" src="https://github.com/Abhiswain97/MyVision/blob/master/logo_size.jpg" height="200" width="200">
-</p>
-<br>
 
 My goal is to make my DL work-flow simple and "Do more with less code".
 So, have a look at the source code modify it as u like, go crazy with customizations.
@@ -34,14 +30,3 @@ Explanation on how to use `DatasetUtils`
 ## Citation
 
 Please use this bibtex if you want to cite this repository in your publications:
-
-```
-@misc{MyVision,
-    author = {Swain, Abhishek},
-    title = {Everything I love about PyTorch},
-    year = {2020},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://github.com/Abhiswain97/MyVision}},
-}
-```
