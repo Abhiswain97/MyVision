@@ -17,6 +17,11 @@ OR
 
 Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 
+## Documentation:
+
+Refer to the [MNIST.ipynb](https://github.com/Abhiswain97/MyVision/blob/master/examples/MNIST.ipynb) for complete explanation.
+PyTorch is a pre-requisite.
+
 ## Citation
 
 Please use this bibtex if you want to cite this repository in your publications:
