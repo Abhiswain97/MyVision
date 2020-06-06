@@ -26,7 +26,3 @@ Can also be launched using: [![Binder](https://mybinder.org/badge_logo.svg)](htt
 ## Coming soon.... 
 
 Explanation on how to use `DatasetUtils`
-
-## Citation
-
-Please use this bibtex if you want to cite this repository in your publications:
