@@ -17,3 +17,17 @@ OR
 
 Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 
+## Citation
+
+Please use this bibtex if you want to cite this repository in your publications:
+
+```
+@misc{MyVision,
+    author = {Swain, Abhishek},
+    title = {Everything I love about PyTorch},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/Abhiswain97/MyVision}},
+}
+```
