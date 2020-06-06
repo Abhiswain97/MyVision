@@ -1,6 +1,10 @@
 [![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision)
 [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision)
 
+[![Downloads](https://pepy.tech/badge/myvision)](https://pepy.tech/project/myvision)
+[![Downloads](https://pepy.tech/badge/myvision/month)](https://pepy.tech/project/myvision/month)
+[![Downloads](https://pepy.tech/badge/myvision/week)](https://pepy.tech/project/myvision/week)
+
 # MyVision: Eveything I love about PyTorch
 
 My goal is to make my DL work-flow simple and "Do more with less code".
