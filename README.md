@@ -21,7 +21,8 @@ Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 Refer to 
 [![MNIST.ipynb](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Gbz7edT2-1jupG8UGNg850tlc6rG_u1H#scrollTo=caiCEj_Os-93) for complete explanation on how to use `Trainer`.
 <br>
-Can also be launched using: [![MNIST](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/blob/master/examples/MNIST.ipynb/master)
+Can also be launched using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/blob/master/examples/MNIST.ipynb/master)
+
 
 ## Coming soon.... 
 
