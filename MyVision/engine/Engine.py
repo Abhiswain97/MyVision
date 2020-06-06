@@ -84,11 +84,7 @@ class Trainer:
 
             losses.update(val=loss.item(), n=images.size(0))
 
-        return (
-            np.array(list(predictions)),
-            np.array(list(gts)),
-            losses.avg
-        )
+        return (np.array(list(predictions)), np.array(list(gts)), losses.avg)
 
     def fit(self, epochs, metric):
 
@@ -106,11 +102,13 @@ class Trainer:
                 if not os.path.exists("models"):
                     os.mkdir("models")
                 print("[SAVING].....")
-                torch.save(self.model.state_dict(), f"models\\best_model-({epoch}).pth.tar")
+                torch.save(
+                    self.model.state_dict(), f"models\\best_model-({epoch}).pth.tar"
+                )
 
             if len(np.unique(preds)) > 2:
 
-                multiclass_metrics = ['accuracy']
+                multiclass_metrics = ["accuracy"]
 
                 preds = [np.argmax(p) for p in preds]
 
@@ -118,7 +116,7 @@ class Trainer:
                     metric, y_true=gts, y_pred=preds, y_proba=None
                 )
             else:
-                binary_metrics = ['auc', 'f1', 'recall', 'precision']
+                binary_metrics = ["auc", "f1", "recall", "precision"]
 
                 preds = [1 if p >= 0.5 else 0 for p in preds]
 
@@ -130,7 +128,8 @@ class Trainer:
 
             print(
                 tabulate(
-                    table_list, headers=("Epoch", "Train loss", "Validation loss", metric)
+                    table_list,
+                    headers=("Epoch", "Train loss", "Validation loss", metric),
                 )
             )
 
