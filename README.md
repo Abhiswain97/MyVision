@@ -18,8 +18,8 @@ Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
 
 ## Documentation:
 
-Refer to the [MNIST.ipynb](https://github.com/Abhiswain97/MyVision/blob/master/examples/MNIST.ipynb) for complete explanation.
-PyTorch is a pre-requisite.
+Refer to the 
+[![MNIST.ipynb](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Gbz7edT2-1jupG8UGNg850tlc6rG_u1H#scrollTo=caiCEj_Os-93) for complete explanation.
 
 ## Citation
 
