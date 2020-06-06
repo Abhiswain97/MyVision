@@ -33,4 +33,4 @@ Explanation on how to use `DatasetUtils`
 
 ## First proper release with all the features working 
 
-June 5, 2020 
+June 6, 2020 
