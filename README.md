@@ -3,9 +3,14 @@
 
 [![Downloads](https://pepy.tech/badge/myvision)](https://pepy.tech/project/myvision)
 
-# MyVision: Eveything I love about PyTorch
+# MyVision: Customizability meets abstraction
 
-My goal is to make my DL work-flow simple and "Do more with less code".
+<p align="center">
+  <img src="https://github.com/Abhiswain97/MyVision/blob/master/logo.png" height="500" width="500">
+</p>
+
+
+My goal is to make my DL work-flow simple, be ultimately customizable and have also have the right amout of abstraction.
 So, have a look at the source code modify it as u like, go crazy with customizations.
 I will keep updating it, as I learn more things. :D 
 
