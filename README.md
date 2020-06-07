@@ -1,11 +1,9 @@
 [![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision)
 [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision)
 
+[![Downloads](https://pepy.tech/badge/myvision)](https://pepy.tech/project/myvision)
+
 # MyVision: Eveything I love about PyTorch
-<p align="center">
-    <img align="center" src="https://github.com/Abhiswain97/MyVision/blob/master/logo_size.jpg" height="200" width="200">
-</p>
-<br>
 
 My goal is to make my DL work-flow simple and "Do more with less code".
 So, have a look at the source code modify it as u like, go crazy with customizations.
@@ -31,17 +29,6 @@ Can also be launched using: [![Binder](https://mybinder.org/badge_logo.svg)](htt
 
 Explanation on how to use `DatasetUtils`
 
-## Citation
+## First proper release with all the features working 
 
-Please use this bibtex if you want to cite this repository in your publications:
-
-```
-@misc{MyVision,
-    author = {Swain, Abhishek},
-    title = {Everything I love about PyTorch},
-    year = {2020},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://github.com/Abhiswain97/MyVision}},
-}
-```
+June 6, 2020 
