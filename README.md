@@ -6,7 +6,7 @@
 # MyVision: Customizability meets abstraction
 
 <p align="center">
-  <img src="https://github.com/Abhiswain97/MyVision/blob/master/logo.png" height="500" width="500">
+  <img src="https://github.com/Abhiswain97/MyVision/blob/master/logo.png" height="300" width="300">
 </p>
 
 
