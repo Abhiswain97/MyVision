@@ -47,19 +47,19 @@ class DatasetUtils:
     ):
         if is_CV:
             train_dataset = CVDataset(
-                train_df,
-                train_idx,
-                self.image_path_column,
-                self.target_column,
+                df=self.train_df,
+                indices=train_idx,
+                image_paths=self.image_path_column,
+                target_cols=self.target_column,
                 transform=self.train_tfms,
                 resize=resize,
             )
 
             valid_dataset = CVDataset(
-                train_df,
-                val_idx,
-                self.image_path_column,
-                self.target_column,
+                df=self.train_df,
+                indices=val_idx,
+                image_paths=self.image_path_column,
+                target_cols=self.target_column,
                 transform=self.valid_tfms,
                 resize=resize,
             )
@@ -107,7 +107,7 @@ class SimpleDataset(Dataset):
 
         image = self.default_tfms(image)
 
-        target = torch.tensor(target)
+        target = torch.tensor(target, dtype=torch.long)
 
         return image, target
 
@@ -130,6 +130,7 @@ class CVDataset(Dataset):
         self.transform = transform
         self.default_tfms = transforms.Compose(
             [
+                transforms.ToPILImage(),
                 transforms.Resize((resize, resize)),
                 transforms.ToTensor(),
                 transforms.Normalize(
@@ -141,18 +142,18 @@ class CVDataset(Dataset):
         self.target_cols = target_cols
 
     def __getitem__(self, idx: int):
-        image_ids = operator.itemgetter(*self.indices)(self.df[[self.image_paths]])
-        labels = operator.itemgetter(*self.indices)(self.df[[self.target_cols]])
+        image_ids = operator.itemgetter(*self.indices)(self.df[self.image_paths])
+        labels = operator.itemgetter(*self.indices)(self.df[self.target_cols])
 
         image = Image.open(image_ids[idx])
-        label = torch.tensor(labels[idx])
+        label = torch.tensor(labels[idx], dtype=torch.long)
 
         if self.transform:
             image = self.transform(image)
 
         image = self.default_tfms(image)
 
-        return image, label
+        return image.clone().detach().requires_grad(True), label
 
     def __len__(self):
         return len(self.indices)
