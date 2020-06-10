@@ -8,77 +8,57 @@ from ..utils import Meters, LabelUtils
 from .. import metrics
 
 import os
+import sys
 import time
 from itertools import chain
 from abc import ABC, abstractmethod
 
 
 class Trainer(object):
-    def __init__(
-            self,
-            train_loader,
-            val_loader,
-            test_loader,
-            device,
-            loss,
-            optimizer,
-            model,
-            lr_scheduler,
-            accumulation_steps=1,
-    ):
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-        self.test_loader = test_loader
-        self.device = device
-        self.criterion = loss
-        self.optimizer = optimizer
-        self.model = model
-        self.lr_scheduler = lr_scheduler
-        self.accumulation_steps = accumulation_steps
-
-    def train(self):
+    @staticmethod
+    def train(train_loader, device, criterion, optimizer, model, accumulation_steps=1):
         losses = Meters.AverageMeter("Loss", ":.4e")
 
-        self.model.train()
+        model.train()
 
-        tl = tqdm(self.train_loader)
+        tl = tqdm(train_loader, file=sys.stdout)
         for batch_idx, (images, targets) in enumerate(tl, 1):
 
-            self.optimizer.zero_grad()
+            optimizer.zero_grad()
 
-            images = images.to(self.device)
-            targets = targets.to(self.device)
+            images = images.to(device)
+            targets = targets.to(device)
 
-            outputs = self.model(images)
+            outputs = model(images)
 
-            loss = self.criterion(outputs, targets)
+            loss = criterion(outputs, targets)
 
             loss.backward()
 
-            if batch_idx % self.accumulation_steps == 0:
-                self.optimizer.step()
+            if batch_idx % accumulation_steps == 0:
+                optimizer.step()
 
             losses.update(val=loss.item(), n=images.size(0))
 
         return losses.avg
 
-    @torch.no_grad()
-    def validate(self):
+    @staticmethod
+    def validate(val_loader, device, criterion, optimizer, model):
         losses = Meters.AverageMeter("Loss", ":.4e")
 
-        self.model.eval()
+        model.eval()
 
         predictions = []
         gts = []
 
-        vl = tqdm(self.val_loader)
+        vl = tqdm(val_loader, file=sys.stdout)
         for batch_idx, (images, targets) in enumerate(vl, 1):
-            images = images.to(self.device)
-            targets = targets.to(self.device)
+            images = images.to(device)
+            targets = targets.to(device)
 
-            outputs = self.model(images)
+            outputs = model(images)
 
-            loss = self.criterion(outputs, targets)
+            loss = criterion(outputs, targets)
 
             predictions = chain(predictions, outputs.detach().cpu().numpy())
             gts = chain(gts, targets.detach().cpu().numpy())
@@ -87,7 +67,20 @@ class Trainer(object):
 
         return np.array(list(predictions)), np.array(list(gts)), losses.avg
 
-    def fit(self, epochs, metric_name, checkpoint_path="models"):
+    @staticmethod
+    def fit(
+        train_loader,
+        val_loader,
+        device,
+        criterion,
+        optimizer,
+        model,
+        epochs,
+        metric_name,
+        lr_scheduler=None,
+        checkpoint_path="models",
+        accumulation_steps=1,
+    ):
 
         Score = 0
         best_loss = 1
@@ -95,9 +88,14 @@ class Trainer(object):
 
         for epoch in range(epochs):
 
-            train_loss = self.train()
+            train_loss = Trainer.train(
+                train_loader, device, criterion, optimizer, model, accumulation_steps
+            )
 
-            preds, gts, valid_loss = self.validate()
+            with torch.no_grad():
+                preds, gts, valid_loss = Trainer.validate(
+                    val_loader, device, criterion, optimizer, model
+                )
 
             if valid_loss < best_loss:
 
@@ -106,9 +104,11 @@ class Trainer(object):
 
                 print(f"[SAVING] to {checkpoint_path}\\best_model-({epoch}).pth.tar")
                 torch.save(
-                    self.model.state_dict(),
+                    model.state_dict(),
                     f"{checkpoint_path}\\best_model-({epoch}).pth.tar",
                 )
+
+                best_loss = valid_loss
 
             pred_labels = LabelUtils.probs_to_labels(preds)
 
@@ -116,9 +116,11 @@ class Trainer(object):
 
             given_metric = metrics.ClassificationMetrics()
 
-            score = given_metric(metric=metric_name, y_true=gts, y_pred=pred_labels) \
-                if metric_name in defined_metrics \
+            score = (
+                given_metric(metric=metric_name, y_true=gts, y_pred=pred_labels)
+                if metric_name in defined_metrics
                 else None
+            )
 
             if score:
                 table_list.append((epoch, train_loss, valid_loss, score))
@@ -132,29 +134,18 @@ class Trainer(object):
                 )
             )
 
-            if self.lr_scheduler:
-                if score is not None:
-                    self.lr_scheduler.step(score)
-                else:
-                    self.lr_scheduler.step(valid_loss)
+            if lr_scheduler:
+                lr_scheduler.step(score)
 
 
-class CustomTrainer(ABC, Trainer):
+class CustomTrainer(ABC):
     """
     Abstract base class for defining your own custom training and validation steps,
     basically your own `Trainer`.
-    Takes in the same arguments as Trainer
     """
 
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ):
-        super(Trainer).__init__()
-
-    @abstractmethod
-    def train(self):
+    @staticmethod
+    def train():
         """
         This method defines the custom training step you define.
 
@@ -162,10 +153,11 @@ class CustomTrainer(ABC, Trainer):
             a dictionary containing the:
                 train_loss: Average training loss after one epoch.
         """
+
         return {"avg_train_loss": train_loss}
 
-    @torch.no_grad()
-    def validate(self):
+    @staticmethod
+    def validate():
         """
         This method defines the custom training step you define.
 
@@ -178,6 +170,7 @@ class CustomTrainer(ABC, Trainer):
         """
         return {"preds": preds, "targets": gts, "avg_val_loss": valid_loss}
 
+    @staticmethod
     def fit(self, epochs, metric=None, checkpoint_path="models"):
 
         best_loss = 1
@@ -201,14 +194,14 @@ class CustomTrainer(ABC, Trainer):
                 )
 
             pred_labels = LabelUtils.probs_to_labels(preds)
-             
+
             score = metric(pred_labels, preds) if metric else None
 
             if score:
                 table_list.append((epoch, train_loss, valid_loss, score))
             else:
                 table_list.append((epoch, train_loss, valid_loss))
-            
+
             print(
                 tabulate(
                     table_list,
@@ -221,4 +214,3 @@ class CustomTrainer(ABC, Trainer):
                     self.lr_scheduler.step(score)
                 else:
                     self.lr_scheduler.step(valid_loss)
-

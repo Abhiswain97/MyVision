@@ -1,11 +1,12 @@
 import torch
 from torch.utils.data import Dataset
 from PIL import Image, ImageFile
+import cv2
 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import albumentations as A
+import albumentations
 import torchvision.transforms as transforms
 
 
@@ -43,7 +44,7 @@ class DatasetUtils:
         )
 
     def make_dataset(
-        self, resize, train_idx=None, val_idx=None, valid_size=0.25, is_CV=None
+        self, resize, train_idx=None, val_idx=None, valid_size=0.25, is_CV=False
     ):
         if is_CV:
             train_dataset = CVDataset(
@@ -87,29 +88,33 @@ class SimpleDataset(Dataset):
     def __init__(self, image_paths, targets, transform=None, resize=224):
         self.image_paths = image_paths
         self.targets = targets
-        self.default_tfms = transforms.Compose(
+        mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+        self.resize = resize
+        self.default_aug = albumentations.Compose(
             [
-                transforms.Resize((resize, resize)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                albumentations.Normalize(
+                    mean, std, max_pixel_value=255.0, always_apply=True
                 ),
+                albumentations.Resize(self.resize, self.resize),
             ]
         )
         self.transform = transform
 
     def __getitem__(self, index: int):
         image = Image.open(self.image_paths[index])
-        target = self.targets[index]
+        label = self.targets[index]
 
         if self.transform:
             image = self.transform(image)
 
-        image = self.default_tfms(image)
+        augmented_image = self.default_aug(image=np.array(image))
 
-        target = torch.tensor(target, dtype=torch.long)
+        image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
 
-        return image, target
+        return (
+            torch.tensor(image, dtype=torch.float),
+            torch.tensor(label, dtype=torch.long),
+        )
 
     def __len__(self):
         return len(self.image_paths)
@@ -128,14 +133,14 @@ class CVDataset(Dataset):
         self.df = df
         self.indices = indices
         self.transform = transform
-        self.default_tfms = transforms.Compose(
+        mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+        self.resize = resize
+        self.default_aug = albumentations.Compose(
             [
-                transforms.ToPILImage(),
-                transforms.Resize((resize, resize)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                albumentations.Normalize(
+                    mean, std, max_pixel_value=255.0, always_apply=True
                 ),
+                albumentations.Resize(self.resize, self.resize),
             ]
         )
         self.image_paths = image_paths
@@ -151,9 +156,14 @@ class CVDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        image = self.default_tfms(image)
+        augmented_image = self.default_aug(image=np.array(image))
 
-        return image.clone().detach().requires_grad(True), label
+        image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
+
+        return (
+            torch.tensor(image, dtype=torch.float),
+            torch.tensor(label, dtype=torch.long),
+        )
 
     def __len__(self):
         return len(self.indices)

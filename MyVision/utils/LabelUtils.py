@@ -17,16 +17,17 @@ def categorify(df, label_column, start_from):
         Dictionary of label to integer class mapping.
     """
     if all(isinstance(item, str) for item in df[label_column].values):
-        print('Converting to integer labels...')
-        
+        print("Converting to integer labels...")
+
         label_dict = {}
         for k, v in enumerate(df[label_column].unique(), start=start_from):
             label_dict[v] = k
 
         return label_dict
     else:
-        assert all(isinstance(item, int) for item in df[label_column].values), "Labels already in integer format"
-
+        assert all(
+            isinstance(item, int) for item in df[label_column].values
+        ), "Labels already in integer format"
 
 
 def probs_to_labels(probs_, thresh=0.5):
