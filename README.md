@@ -34,6 +34,3 @@ Can also be launched using: [![Binder](https://mybinder.org/badge_logo.svg)](htt
 
 Explanation on how to use `DatasetUtils`
 
-## First proper release with all the features working 
-
-June 6, 2020 
