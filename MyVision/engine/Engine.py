@@ -143,7 +143,31 @@ class CustomTrainer(ABC):
     Abstract base class for defining your own custom training and validation steps,
     basically your own `Trainer`.
     """
-
+    def __init__(
+        self,
+        train_loader,
+        val_loader,
+        device,
+        criterion,
+        optimizer,
+        model,
+        epochs,
+        metric_name,
+        lr_scheduler=None,
+        checkpoint_path="models",
+        accumulation_steps=1,
+    ):
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.device = device
+        self.optimizer = optimizer
+        self.criterion = criterion
+        self.model = model
+        self.lr_scheduler = lr_scheduler
+        self.metric_name = metric_name
+        self.checkpoint_path = checkpoint_path
+        self.accumulation_steps = accumulation_steps
+        
     @staticmethod
     def train():
         """
