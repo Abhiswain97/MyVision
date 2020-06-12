@@ -123,14 +123,15 @@ class Trainer(object):
             )
 
             if score:
-                table_list.append((epoch, train_loss, valid_loss, score))
+                table_list.append((epoch+1, round(train_loss, 3), round(valid_loss, 3), score))
             else:
-                table_list.append((epoch, train_loss, valid_loss))
+                table_list.append((epoch+1, round(train_loss, 3), round(valid_loss, 3)))
 
             print(
                 tabulate(
                     table_list,
                     headers=("Epoch", "Train loss", "Validation loss", metric_name),
+                    tablefmt='pretty'
                 )
             )
 
