@@ -21,37 +21,50 @@ class DatasetUtils:
     """
 
     def __init__(
-        self, train_df, image_path_column, target_column, train_tfms, valid_tfms
+        self,
+        train_df=None,
+        image_paths=None,
+        targets=None,
+        train_tfms=None,
+        valid_tfms=None,
     ):
         self.train_df = train_df
-        self.image_path_column = image_path_column
-        self.target_column = target_column
+        self.image_paths = image_paths
+        self.targets = targets
         self.train_tfms = train_tfms
         self.valid_tfms = valid_tfms
 
-    def splitter(self, valid_size=0.25):
-        train_images, valid_images, train_labels, valid_labels = train_test_split(
-            self.train_df[self.image_path_column],
-            self.train_df[self.target_column],
-            test_size=valid_size,
-            random_state=42,
-        )
+    def splitter(self, image_paths=None, targets=None, valid_size=0.25):
+
+        if self.train_df:
+            train_images, valid_images, train_labels, valid_labels = train_test_split(
+                self.train_df[self.image_paths],
+                self.train_df[self.targets],
+                test_size=valid_size,
+                random_state=42,
+            )
+
+        else:
+            train_images, valid_images, train_labels, valid_labels = train_test_split(
+                self.image_paths, self.targets, test_size=valid_size, random_state=42,
+            )
+
         return (
-            train_images.values,
-            train_labels.values,
-            valid_images.values,
-            valid_labels.values,
+            train_images,
+            train_labels,
+            valid_images,
+            valid_labels,
         )
 
     def make_dataset(
-        self, resize, train_idx=None, val_idx=None, valid_size=0.25, is_CV=False
+        self, resize=128, train_idx=None, val_idx=None, valid_size=0.25, is_CV=False
     ):
         if is_CV:
             train_dataset = CVDataset(
                 df=self.train_df,
                 indices=train_idx,
-                image_paths=self.image_path_column,
-                target_cols=self.target_column,
+                image_paths=self.image_paths,
+                target_cols=self.targets,
                 transform=self.train_tfms,
                 resize=resize,
             )
@@ -59,8 +72,8 @@ class DatasetUtils:
             valid_dataset = CVDataset(
                 df=self.train_df,
                 indices=val_idx,
-                image_paths=self.image_path_column,
-                target_cols=self.target_column,
+                image_paths=self.image_paths,
+                target_cols=self.targets,
                 transform=self.valid_tfms,
                 resize=resize,
             )
@@ -74,11 +87,15 @@ class DatasetUtils:
             ) = self.splitter(valid_size=valid_size)
 
             train_dataset = SimpleDataset(
-                train_image_paths, train_labels, transform=self.train_tfms
+                image_paths=train_image_paths,
+                targets=train_labels,
+                transform=self.train_tfms,
             )
 
             valid_dataset = SimpleDataset(
-                valid_image_paths, valid_labels, transform=self.valid_tfms
+                image_paths=valid_image_paths,
+                targets=valid_labels,
+                transform=self.valid_tfms,
             )
 
         return train_dataset, valid_dataset
@@ -112,8 +129,8 @@ class SimpleDataset(Dataset):
         image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
 
         return (
-            torch.tensor(image, dtype=torch.float),
-            torch.tensor(label, dtype=torch.long),
+            torch.tensor(image),
+            torch.tensor(label),
         )
 
     def __len__(self):
@@ -122,13 +139,7 @@ class SimpleDataset(Dataset):
 
 class CVDataset(Dataset):
     def __init__(
-        self,
-        df: pd.DataFrame,
-        indices: np.ndarray,
-        image_paths,
-        target_cols,
-        transform=None,
-        resize=224,
+        self, df, indices, image_paths, targets, transform=None, resize=224,
     ):
         self.df = df
         self.indices = indices
@@ -144,14 +155,19 @@ class CVDataset(Dataset):
             ]
         )
         self.image_paths = image_paths
-        self.target_cols = target_cols
+        self.targets = targets
 
-    def __getitem__(self, idx: int):
-        image_ids = operator.itemgetter(*self.indices)(self.df[self.image_paths])
-        labels = operator.itemgetter(*self.indices)(self.df[self.target_cols])
+    def __getitem__(self, idx):
+
+        if self.df:
+            image_ids = operator.itemgetter(*self.indices)(self.df[self.image_paths])
+            labels = operator.itemgetter(*self.indices)(self.df[self.target_cols])
+        else:
+            image_ids = operator.itemgetter(*self.indices)(self.image_paths)
+            labels = operator.itemgetter(*self.indices)(self.targets)
 
         image = Image.open(image_ids[idx])
-        label = torch.tensor(labels[idx], dtype=torch.long)
+        label = labels[idx]
 
         if self.transform:
             image = self.transform(image)
@@ -161,8 +177,8 @@ class CVDataset(Dataset):
         image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
 
         return (
-            torch.tensor(image, dtype=torch.float),
-            torch.tensor(label, dtype=torch.long),
+            torch.tensor(image),
+            torch.tensor(label),
         )
 
     def __len__(self):

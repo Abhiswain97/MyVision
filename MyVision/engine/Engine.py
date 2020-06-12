@@ -31,7 +31,10 @@ class Trainer(object):
 
             outputs = model(images)
 
-            loss = criterion(outputs, targets)
+            if isinstance(criterion, (torch.nn.BCEWithLogitsLoss)):
+                loss = criterion(outputs, targets.unsqueeze(1).float())
+            else:
+                loss = criterion(outputs, targets)
 
             loss.backward()
 
@@ -58,7 +61,10 @@ class Trainer(object):
 
             outputs = model(images)
 
-            loss = criterion(outputs, targets)
+            if isinstance(criterion, (torch.nn.BCEWithLogitsLoss)):
+                loss = criterion(outputs, targets.unsqueeze(1).float())
+            else:
+                loss = criterion(outputs, targets)
 
             predictions = chain(predictions, outputs.detach().cpu().numpy())
             gts = chain(gts, targets.detach().cpu().numpy())
@@ -123,15 +129,19 @@ class Trainer(object):
             )
 
             if score:
-                table_list.append((epoch+1, round(train_loss, 3), round(valid_loss, 3), score))
+                table_list.append(
+                    (epoch + 1, round(train_loss, 3), round(valid_loss, 3), score)
+                )
             else:
-                table_list.append((epoch+1, round(train_loss, 3), round(valid_loss, 3)))
+                table_list.append(
+                    (epoch + 1, round(train_loss, 3), round(valid_loss, 3))
+                )
 
             print(
                 tabulate(
                     table_list,
                     headers=("Epoch", "Train loss", "Validation loss", metric_name),
-                    tablefmt='pretty'
+                    tablefmt="pretty",
                 )
             )
 
@@ -144,6 +154,7 @@ class CustomTrainer(ABC):
     Abstract base class for defining your own custom training and validation steps,
     basically your own `Trainer`.
     """
+
     def __init__(
         self,
         train_loader,
@@ -168,7 +179,7 @@ class CustomTrainer(ABC):
         self.metric_name = metric_name
         self.checkpoint_path = checkpoint_path
         self.accumulation_steps = accumulation_steps
-        
+
     @staticmethod
     def train():
         """
