@@ -1,118 +1,130 @@
 import torch
 from torch.utils.data import Dataset
 from PIL import Image, ImageFile
-import cv2
 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import albumentations
-import torchvision.transforms as transforms
-
 
 import operator
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-class DatasetUtils:
+class DatasetUtils(object):
     """
-    This class contains utilities for making a Pytorch Dataset.  
+    This class contains utilities for making a PyTorch Dataset.
     """
 
-    def __init__(
-        self,
+    @staticmethod
+    def splitter(train_df=None, image_paths=None, targets=None, valid_size=0.25):
+
+        if isinstance(train_df, pd.DataFrame):
+            train_images, valid_images, train_labels, valid_labels = train_test_split(
+                train_df[image_paths],
+                train_df[targets],
+                test_size=valid_size,
+                random_state=42,
+            )
+
+            return (
+                train_images.values.tolist(),
+                train_labels.values.tolist(),
+                valid_images.values.tolist(),
+                valid_labels.values.tolist(),
+            )
+
+        else:
+            train_images, valid_images, train_labels, valid_labels = train_test_split(
+                image_paths, targets, test_size=valid_size, random_state=42,
+            )
+
+            return (
+                train_images,
+                train_labels,
+                valid_images,
+                valid_labels,
+            )
+
+    @staticmethod
+    def make_dataset(
         train_df=None,
         image_paths=None,
         targets=None,
         train_tfms=None,
         valid_tfms=None,
-    ):
-        self.train_df = train_df
-        self.image_paths = image_paths
-        self.targets = targets
-        self.train_tfms = train_tfms
-        self.valid_tfms = valid_tfms
-
-    def splitter(self, image_paths=None, targets=None, valid_size=0.25):
-
-        if self.train_df:
-            train_images, valid_images, train_labels, valid_labels = train_test_split(
-                self.train_df[self.image_paths],
-                self.train_df[self.targets],
-                test_size=valid_size,
-                random_state=42,
-            )
-
-        else:
-            train_images, valid_images, train_labels, valid_labels = train_test_split(
-                self.image_paths, self.targets, test_size=valid_size, random_state=42,
-            )
-
-        return (
-            train_images,
-            train_labels,
-            valid_images,
-            valid_labels,
-        )
-
-    def make_dataset(
-        self, resize=128, train_idx=None, val_idx=None, valid_size=0.25, is_CV=False
+        train_idx=None,
+        val_idx=None,
+        valid_size=0.25,
+        is_CV=False,
+        split=True,
     ):
         if is_CV:
             train_dataset = CVDataset(
-                df=self.train_df,
+                df=train_df,
                 indices=train_idx,
-                image_paths=self.image_paths,
-                target_cols=self.targets,
-                transform=self.train_tfms,
-                resize=resize,
+                image_paths=image_paths,
+                targets=targets,
+                transform=train_tfms,
             )
 
             valid_dataset = CVDataset(
-                df=self.train_df,
+                df=train_df,
                 indices=val_idx,
-                image_paths=self.image_paths,
-                target_cols=self.targets,
-                transform=self.valid_tfms,
-                resize=resize,
+                image_paths=image_paths,
+                targets=targets,
+                transform=valid_tfms,
             )
         else:
 
-            (
-                train_image_paths,
-                train_labels,
-                valid_image_paths,
-                valid_labels,
-            ) = self.splitter(valid_size=valid_size)
+            if split:
 
-            train_dataset = SimpleDataset(
-                image_paths=train_image_paths,
-                targets=train_labels,
-                transform=self.train_tfms,
-            )
+                (
+                    train_image_paths,
+                    train_labels,
+                    valid_image_paths,
+                    valid_labels,
+                ) = DatasetUtils.splitter(
+                    train_df=train_df,
+                    image_paths=image_paths,
+                    targets=targets,
+                    valid_size=valid_size,
+                )
 
-            valid_dataset = SimpleDataset(
-                image_paths=valid_image_paths,
-                targets=valid_labels,
-                transform=self.valid_tfms,
-            )
+                train_dataset = SimpleDataset(
+                    image_paths=train_image_paths,
+                    targets=train_labels,
+                    transform=train_tfms,
+                )
 
-        return train_dataset, valid_dataset
+                valid_dataset = SimpleDataset(
+                    image_paths=valid_image_paths,
+                    targets=valid_labels,
+                    transform=valid_tfms,
+                )
+
+                return train_dataset, valid_dataset
+
+            else:
+
+                train_dataset = SimpleDataset(
+                    image_paths=image_paths, targets=targets, transform=train_tfms
+                )
+
+                return train_dataset
 
 
 class SimpleDataset(Dataset):
-    def __init__(self, image_paths, targets, transform=None, resize=224):
+    def __init__(self, image_paths, targets, transform=None):
         self.image_paths = image_paths
         self.targets = targets
         mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
-        self.resize = resize
         self.default_aug = albumentations.Compose(
             [
                 albumentations.Normalize(
                     mean, std, max_pixel_value=255.0, always_apply=True
                 ),
-                albumentations.Resize(self.resize, self.resize),
             ]
         )
         self.transform = transform
@@ -138,20 +150,20 @@ class SimpleDataset(Dataset):
 
 
 class CVDataset(Dataset):
-    def __init__(
-        self, df, indices, image_paths, targets, transform=None, resize=224,
-    ):
+    """
+    This class provides utilities for doing cross-validation, using a PyTorch Dataset.
+    """
+
+    def __init__(self, df, indices, image_paths, targets, transform=None):
         self.df = df
         self.indices = indices
         self.transform = transform
         mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
-        self.resize = resize
         self.default_aug = albumentations.Compose(
             [
                 albumentations.Normalize(
                     mean, std, max_pixel_value=255.0, always_apply=True
-                ),
-                albumentations.Resize(self.resize, self.resize),
+                )
             ]
         )
         self.image_paths = image_paths
@@ -159,7 +171,7 @@ class CVDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        if self.df:
+        if isinstance(self.df, pd.DataFrame):
             image_ids = operator.itemgetter(*self.indices)(self.df[self.image_paths])
             labels = operator.itemgetter(*self.indices)(self.df[self.target_cols])
         else:

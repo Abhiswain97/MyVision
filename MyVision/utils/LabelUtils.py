@@ -30,7 +30,7 @@ def categorify(df, label_column, start_from):
         ), "Labels already in integer format"
 
 
-def probs_to_labels(probs_, thresh=0.5):
+def probs_to_labels(probs_, thresh=0.8):
     """
     Takes in a list of probabilities and makes them into labels.
     Takes care of multiclass and binary labels automatically.

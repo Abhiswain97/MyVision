@@ -37,6 +37,7 @@ wheels/
 tests/
 data/
 models/
+logs/
 *.egg-info/
 .installed.cfg
 *.egg

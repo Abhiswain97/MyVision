@@ -30,7 +30,9 @@ class ClassificationMetrics:
 
     @staticmethod
     def _auc(y_true, y_pred):
-        return skmetrics.roc_auc_score(y_true=y_true, y_score=y_pred)
+        return skmetrics.roc_auc_score(
+            y_true=y_true, y_score=y_pred, average="weighted", multi_class="ovr"
+        )
 
     @staticmethod
     def _accuracy(y_true, y_pred):

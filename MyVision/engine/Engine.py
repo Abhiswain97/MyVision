@@ -4,17 +4,30 @@ import numpy as np
 
 from tabulate import tabulate
 
-from ..utils import Meters, LabelUtils
+from ..utils import Meters, LabelUtils, csvlogger
 from .. import metrics
 
 import os
 import sys
 import time
+import logging
+import csv
 from itertools import chain
 from abc import ABC, abstractmethod
 
 
 class Trainer(object):
+    # if not os.path.exists("logs"):
+    #     os.mkdir("logs")
+    #
+    # # creating log file
+    # logger = logging.getLogger("Engine-logs")
+    # hdlr = logging.FileHandler(f"logs\\{timestampEND}.log", mode="w")
+    # formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    # hdlr.setFormatter(formatter)
+    # logger.addHandler(hdlr)
+    # logger.setLevel(logging.INFO)
+
     @staticmethod
     def train(train_loader, device, criterion, optimizer, model, accumulation_steps=1):
         losses = Meters.AverageMeter("Loss", ":.4e")
@@ -31,7 +44,7 @@ class Trainer(object):
 
             outputs = model(images)
 
-            if isinstance(criterion, (torch.nn.BCEWithLogitsLoss)):
+            if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
                 loss = criterion(outputs, targets.unsqueeze(1).float())
             else:
                 loss = criterion(outputs, targets)
@@ -61,7 +74,7 @@ class Trainer(object):
 
             outputs = model(images)
 
-            if isinstance(criterion, (torch.nn.BCEWithLogitsLoss)):
+            if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
                 loss = criterion(outputs, targets.unsqueeze(1).float())
             else:
                 loss = criterion(outputs, targets)
@@ -82,17 +95,25 @@ class Trainer(object):
         optimizer,
         model,
         epochs,
-        metric_name,
+        metric_name='accuracy',
         lr_scheduler=None,
         checkpoint_path="models",
         accumulation_steps=1,
+        csv_logger=True,
     ):
 
-        Score = 0
         best_loss = 1
         table_list = []
 
+        train_start_time = time.time()
+
+        csv_logs = csvlogger.CSVLogger() if csv_logger else None
+
+        train_metrics = []
+
         for epoch in range(epochs):
+
+            start_time = time.time()
 
             train_loss = Trainer.train(
                 train_loader, device, criterion, optimizer, model, accumulation_steps
@@ -103,15 +124,25 @@ class Trainer(object):
                     val_loader, device, criterion, optimizer, model
                 )
 
+            
             if valid_loss < best_loss:
 
                 if not os.path.exists(checkpoint_path):
                     os.mkdir(checkpoint_path)
 
-                print(f"[SAVING] to {checkpoint_path}\\best_model-({epoch}).pth.tar")
+                timestampTime = time.strftime("%H%M%S")
+                timestampDate = time.strftime("%d%m%Y")
+                timestampEND = timestampDate + "-" + timestampTime
+
+                print(f"[SAVING] to {checkpoint_path}\\model-[{timestampEND}].pt")
                 torch.save(
-                    model.state_dict(),
-                    f"{checkpoint_path}\\best_model-({epoch}).pth.tar",
+                    {
+                        "model": model,
+                        "state_dict": model.state_dict(),
+                        "best_loss": best_loss,
+                        "best_epoch": epoch,
+                    },
+                    f"{checkpoint_path}\\model-[{timestampEND}].pt",
                 )
 
                 best_loss = valid_loss
@@ -122,15 +153,35 @@ class Trainer(object):
 
             given_metric = metrics.ClassificationMetrics()
 
-            score = (
-                given_metric(metric=metric_name, y_true=gts, y_pred=pred_labels)
-                if metric_name in defined_metrics
-                else None
-            )
+            if metric_name == "auc":
+
+                score = (
+                    given_metric(
+                        metric=metric_name, y_true=gts, y_pred=None, y_proba=preds
+                    )
+                    if metric_name in defined_metrics
+                    else None
+                )
+            else:
+                score = (
+                    given_metric(metric=metric_name, y_true=gts, y_pred=pred_labels)
+                    if metric_name in defined_metrics
+                    else None
+                )
+
+            # log the metrics to a csv files
+            if csv_logger:
+                train_metrics = chain(train_metrics, [epoch+1, round(train_loss, 3), round(valid_loss, 3), round(score, 3)])
+                csv_logs(metrics=list(train_metrics), metric_name=metric_name)
 
             if score:
                 table_list.append(
-                    (epoch + 1, round(train_loss, 3), round(valid_loss, 3), score)
+                    (
+                        epoch + 1,
+                        round(train_loss, 3),
+                        round(valid_loss, 3),
+                        round(score, 3),
+                    )
                 )
             else:
                 table_list.append(
@@ -147,6 +198,14 @@ class Trainer(object):
 
             if lr_scheduler:
                 lr_scheduler.step(score)
+
+            print(f"Epoch completed in: {(time.time() - start_time) / 60} mins")
+
+        print(f"Training completed in {(time.time() - train_start_time) / 60} mins")
+
+        
+
+        
 
 
 class CustomTrainer(ABC):
@@ -169,6 +228,7 @@ class CustomTrainer(ABC):
         checkpoint_path="models",
         accumulation_steps=1,
     ):
+        self.epochs = epochs
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.device = device
