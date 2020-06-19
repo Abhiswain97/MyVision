@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 def freeze_layers(model, freeze_from):
 
@@ -12,7 +13,6 @@ def freeze_layers(model, freeze_from):
 class MixUp:
     @staticmethod
     def mixup_data(x, y, alpha=1.0, device='cpu'):
-    '''Returns mixed inputs, pairs of targets, and lambda'''
         if alpha > 0:
             lam = np.random.beta(alpha, alpha)
         else:

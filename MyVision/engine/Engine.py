@@ -71,11 +71,7 @@ class Trainer(object):
             else:
                 if is_mixup:
                     loss = ModelUtils.MixUp.mixup_criterion(
-                        criterion,
-                        outputs,
-                        targets_a,
-                        targets_b,
-                        lam,
+                        criterion, outputs, targets_a, targets_b, lam,
                     )
                 else:
                     loss = criterion(outputs, targets)
