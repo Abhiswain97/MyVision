@@ -4,7 +4,7 @@ import numpy as np
 
 from tabulate import tabulate
 
-from ..utils import Meters, LabelUtils, csvlogger
+from ..utils import Meters, LabelUtils, csvlogger, ModelUtils
 from .. import metrics
 
 import os
@@ -29,7 +29,15 @@ class Trainer(object):
     # logger.setLevel(logging.INFO)
 
     @staticmethod
-    def train(train_loader, device, criterion, optimizer, model, accumulation_steps=1):
+    def train(
+        train_loader,
+        device,
+        criterion,
+        optimizer,
+        model,
+        accumulation_steps=1,
+        use_mixup=True,
+    ):
         losses = Meters.AverageMeter("Loss", ":.4e")
 
         model.train()
@@ -39,15 +47,38 @@ class Trainer(object):
 
             optimizer.zero_grad()
 
-            images = images.to(device)
-            targets = targets.to(device)
+            if use_mixup:
+                images, targets_a, targets_b, lam = ModelUtils.MixUp.mixup_data(
+                    images, targets, 1.0, device=device
+                )
+            else:
+                images = images.to(device)
+                targets = targets.to(device)
 
             outputs = model(images)
 
             if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
-                loss = criterion(outputs, targets.unsqueeze(1).float())
+                if is_mixup:
+                    loss = ModelUtils.MixUp.mixup_criterion(
+                        criterion,
+                        outputs,
+                        targets_a.unsqueeze(1),
+                        targets_b.unsqueeze(1),
+                        lam,
+                    )
+                else:
+                    loss = criterion(outputs, targets.unsqueeze(1).float())
             else:
-                loss = criterion(outputs, targets)
+                if is_mixup:
+                    loss = ModelUtils.MixUp.mixup_criterion(
+                        criterion,
+                        outputs,
+                        targets_a,
+                        targets_b,
+                        lam,
+                    )
+                else:
+                    loss = criterion(outputs, targets)
 
             loss.backward()
 
@@ -95,7 +126,7 @@ class Trainer(object):
         optimizer,
         model,
         epochs,
-        metric_name='accuracy',
+        metric_name="accuracy",
         lr_scheduler=None,
         checkpoint_path="models",
         accumulation_steps=1,
@@ -124,7 +155,6 @@ class Trainer(object):
                     val_loader, device, criterion, optimizer, model
                 )
 
-            
             if valid_loss < best_loss:
 
                 if not os.path.exists(checkpoint_path):
@@ -171,8 +201,15 @@ class Trainer(object):
 
             # log the metrics to a csv files
             if csv_logger:
-                train_metrics = chain(train_metrics, [epoch+1, round(train_loss, 3), round(valid_loss, 3), round(score, 3)])
-                csv_logs(metrics=list(train_metrics), metric_name=metric_name)
+                train_metrics.append(
+                    [
+                        epoch + 1,
+                        round(train_loss, 3),
+                        round(valid_loss, 3),
+                        round(score, 3),
+                    ],
+                )
+                csv_logs(metrics=train_metrics, metric_name=metric_name)
 
             if score:
                 table_list.append(
@@ -202,10 +239,6 @@ class Trainer(object):
             print(f"Epoch completed in: {(time.time() - start_time) / 60} mins")
 
         print(f"Training completed in {(time.time() - train_start_time) / 60} mins")
-
-        
-
-        
 
 
 class CustomTrainer(ABC):
