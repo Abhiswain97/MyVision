@@ -9,19 +9,8 @@
   <img src="https://github.com/Abhiswain97/MyVision/blob/master/logo.png" height="300" width="300">
 </p>
 
-
 My goal is to make my DL work-flow simple, be ultimately customizable and have also have the right amout of abstraction.
-So, have a look at the source code modify it as u like, go crazy with customizations.
-I will keep updating it, as I learn more things. :D 
-
-To download do: 
-```
-pip install MyVision
-```
-
-OR 
-
-Download a binary: [Download](https://github.com/Abhiswain97/MyVision/releases)
+So, have a look at the source code, modify as you like. I will keep updating it, as I learn more things. :D 
 
 ## Documentation:
 
@@ -31,3 +20,4 @@ Launch using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.
 
 Explanation on how to use `DatasetUtils`
 
+### Current release has a lot of bugs so I will only release a new one after I completely test it out. My bad I released it in a hurry.
