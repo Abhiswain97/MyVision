@@ -20,4 +20,4 @@ Launch using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.
 
 Explanation on how to use `DatasetUtils`
 
-### Current release has a lot of bugs so I will only release a new one after I completely test it out. My bad I released it in a hurry.
+### Current release has a lot of bugs so I will only release a new one after I completely test it out. My bad I released it in a hurry. Till then you can directly look at the source code. I will keep it updating. This is my first time doing something like this, so even I am learinng
