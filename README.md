@@ -12,7 +12,7 @@ So, have a look at the source code, modify as you like. I will keep updating it,
 ## TO-DO
 - [x] Fixed bugs.
 - [x] Added CSVLogger, writes your training metrics to a csv file "metrics.csv"
-- [ ] Add a system 
+- [ ] Add a system of Callbacks
 
 ## Documentation:
 
