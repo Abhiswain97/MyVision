@@ -1,3 +1,4 @@
-## 0.0.9 
-* Fixed a ton of bugs  
-* Added CSVLogger(), basically writes your training metrics to a csv file "metrics.csv"
+## 0.0.9 (Unreleased)
+- [x] Fixed a ton of bugs
+- [x] Added CSVLogger, writes your training metrics to a csv file "metrics.csv"
+- [ ] Add a flexible callback system.
