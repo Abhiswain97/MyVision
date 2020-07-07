@@ -36,7 +36,7 @@ class Trainer(object):
         optimizer,
         model,
         accumulation_steps=1,
-        use_mixup=True,
+        use_mixup=False,
     ):
         losses = Meters.AverageMeter("Loss", ":.4e")
 
@@ -58,7 +58,7 @@ class Trainer(object):
             outputs = model(images)
 
             if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
-                if is_mixup:
+                if use_mixup:
                     loss = ModelUtils.MixUp.mixup_criterion(
                         criterion,
                         outputs,
@@ -69,7 +69,7 @@ class Trainer(object):
                 else:
                     loss = criterion(outputs, targets.unsqueeze(1).float())
             else:
-                if is_mixup:
+                if use_mixup:
                     loss = ModelUtils.MixUp.mixup_criterion(
                         criterion, outputs, targets_a, targets_b, lam,
                     )

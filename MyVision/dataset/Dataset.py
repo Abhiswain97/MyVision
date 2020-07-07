@@ -29,10 +29,10 @@ class DatasetUtils(object):
             )
 
             return (
-                train_images.values.tolist(),
-                train_labels.values.tolist(),
-                valid_images.values.tolist(),
-                valid_labels.values.tolist(),
+                train_images.values,
+                train_labels.values,
+                valid_images.values,
+                valid_labels.values,
             )
 
         else:
