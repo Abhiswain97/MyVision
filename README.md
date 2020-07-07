@@ -1,7 +1,4 @@
 [![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision)
-[![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision)
-
-[![Downloads](https://pepy.tech/badge/myvision)](https://pepy.tech/project/myvision)
 
 # MyVision: Customizability meets abstraction
 
@@ -14,10 +11,13 @@ So, have a look at the source code, modify as you like. I will keep updating it,
 
 ## Documentation:
 
-Launch using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
+Currently available: Launch using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
 
-## Coming soon.... 
+## Download:
 
-Explanation on how to use `DatasetUtils`
+```
+git clone https://github.com/Abhiswain97/MyVision.git
+cd MyVision
+pip install -e .
+```
 
-### Current release has a lot of bugs so I will only release a new one after I completely test it out. My bad I released it in a hurry.
