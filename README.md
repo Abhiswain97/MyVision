@@ -1,5 +1,4 @@
-[![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision) ![Upload Python Package](https://github.com/Abhiswain97/MyVision/workflows/Upload%20Python%20Package/badge.svg) ![Python package](https://github.com/Abhiswain97/MyVision/workflows/Python%20package/badge.svg)
-
+[![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision) ![Upload Python Package](https://github.com/Abhiswain97/MyVision/workflows/Upload%20Python%20Package/badge.svg) 
 
 # MyVision: Customizability meets abstraction
 
