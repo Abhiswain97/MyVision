@@ -22,6 +22,12 @@ Currently available: Launch using: [![Binder](https://mybinder.org/badge_logo.sv
 ## Download:
 
 ```
+pip install MyVision
+```
+
+or if you want to be updated with all the continuous developmental changes just do:
+
+```
 git clone https://github.com/Abhiswain97/MyVision.git
 cd MyVision
 pip install -e .
