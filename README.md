@@ -6,8 +6,9 @@
   <img src="https://github.com/Abhiswain97/MyVision/blob/master/logo.png" height="300" width="300">
 </p>
 
-My goal is to make my DL work-flow simple, be ultimately customizable and have also have the right amout of abstraction.
-So, have a look at the source code, modify as you like. I will keep updating it, as I learn more things. :D 
+My goal is to make my DL work-flow simple, be ultimately customizable and have also have the right amout of abstraction. So I made **MyVision**. It's my computer vison toolkit. Any functionality I like from the other libraries like PyTorch, fast-ai, keras etc, I integrate it into **MyVision** in a flavour of my own. I will keep updating it, as I learn more things.😄
+
+**MyVision** is in it's nascent stages but improving. You're welcome to contribute 😃
 
 ## TO-DO
 - [x] Fixed bugs.
@@ -16,7 +17,9 @@ So, have a look at the source code, modify as you like. I will keep updating it,
 
 ## Documentation:
 
-Currently available: Launch using: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
+Not much actually 😛. But I plan to improve it and add more examples.
+Currently available: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
+OR just go to the `examples` folder.
 
 ## Download:
 
