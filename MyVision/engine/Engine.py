@@ -36,7 +36,6 @@ class Trainer(object):
         optimizer,
         model,
         accumulation_steps=1,
-        use_mixup=False,
     ):
         losses = Meters.AverageMeter("Loss", ":.4e")
 
@@ -47,34 +46,15 @@ class Trainer(object):
 
             optimizer.zero_grad()
 
-            if use_mixup:
-                images, targets_a, targets_b, lam = ModelUtils.MixUp.mixup_data(
-                    images, targets, 1.0, device=device
-                )
-            else:
-                images = images.to(device)
-                targets = targets.to(device)
+            images = images.to(device)
+            targets = targets.to(device)
 
             outputs = model(images)
 
             if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
-                if use_mixup:
-                    loss = ModelUtils.MixUp.mixup_criterion(
-                        criterion,
-                        outputs,
-                        targets_a.unsqueeze(1),
-                        targets_b.unsqueeze(1),
-                        lam,
-                    )
-                else:
-                    loss = criterion(outputs, targets.unsqueeze(1).float())
+                loss = criterion(outputs, targets.unsqueeze(1).float())
             else:
-                if use_mixup:
-                    loss = ModelUtils.MixUp.mixup_criterion(
-                        criterion, outputs, targets_a, targets_b, lam,
-                    )
-                else:
-                    loss = criterion(outputs, targets)
+                loss = criterion(outputs, targets)
 
             loss.backward()
 
