@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import albumentations
+from albumentations.pytorch import ToTensorV2
 
 import operator
 
@@ -15,7 +16,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class DatasetUtils(object):
     """
     This class contains utilities for making a PyTorch Dataset.
-    """
+    """ 
 
     @staticmethod
     def splitter(train_df=None, image_paths=None, targets=None, valid_size=0.25):
@@ -119,14 +120,12 @@ class SimpleDataset(Dataset):
     def __init__(self, image_paths, targets, transform=None):
         self.image_paths = image_paths
         self.targets = targets
-        mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
         self.default_aug = albumentations.Compose(
             [
-                albumentations.Normalize(
-                    mean, std, max_pixel_value=255.0, always_apply=True
-                ),
+                albumentations.Normalize(),
+                ToTensorV2()
             ]
-        )
+        ) 
         self.transform = transform
 
     def __getitem__(self, index: int):
@@ -138,15 +137,45 @@ class SimpleDataset(Dataset):
 
         augmented_image = self.default_aug(image=np.array(image))
 
-        image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
-
         return (
-            torch.tensor(image),
+            torch.tensor(augmented_image['image']),
             torch.tensor(label),
         )
 
     def __len__(self):
         return len(self.image_paths)
+
+
+class PascalVOCDataset(Dataset):
+    def __init__(self, df, image_paths, boxes, targets, transform=None):
+        self.df = df
+        self.transform = transform
+        self.image_paths = image_paths
+        self.boxes = boxes
+        self.targets = targets
+        self.default_aug = albumentations.Normalize()
+        
+    def __getitem__(self, idx):
+        image = Image.open(self.df[self.image_paths][idx])
+        box = self.df[self.boxes].astype(np.float32)[idx]
+        class_ = self.df[self.targets].astype(np.float32)[idx]
+        
+        if self.transform:
+            image = self.transform(image)
+
+        augmented_image = self.default_aug(image=np.array(image))
+    
+        box = torch.as_tensor(box, dtype=torch.float32)
+        class_ = torch.as_tensor(class_, dtype=torch.float32)
+        
+        return {
+            "image": image,
+            "box": box,
+            "class": class_
+        }
+    
+    def __len__(self):
+        return len(self.df)
 
 
 class CVDataset(Dataset):
@@ -158,16 +187,14 @@ class CVDataset(Dataset):
         self.df = df
         self.indices = indices
         self.transform = transform
-        mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
-        self.default_aug = albumentations.Compose(
-            [
-                albumentations.Normalize(
-                    mean, std, max_pixel_value=255.0, always_apply=True
-                )
-            ]
-        )
         self.image_paths = image_paths
         self.targets = targets
+        self.default_aug = albumentations.Compose(
+            [
+                albumentations.Normalize(),
+                ToTensorV2()
+            ]
+        )
 
     def __getitem__(self, idx):
 
@@ -186,10 +213,8 @@ class CVDataset(Dataset):
 
         augmented_image = self.default_aug(image=np.array(image))
 
-        image = np.transpose(augmented_image["image"], (2, 0, 1)).astype(np.float32)
-
         return (
-            torch.tensor(image),
+            torch.tensor(augmented_image['image']),
             torch.tensor(label),
         )
 
