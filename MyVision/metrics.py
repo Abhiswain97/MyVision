@@ -1,7 +1,7 @@
 from sklearn import metrics as skmetrics
 
 
-class ClassificationMetrics:
+class ClassificationMetrics:  
     def __init__(self):
         self.metrics = {
             "accuracy": self._accuracy,

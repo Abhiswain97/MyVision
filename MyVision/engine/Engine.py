@@ -17,17 +17,6 @@ from abc import ABC, abstractmethod
 
 
 class Trainer(object):
-    # if not os.path.exists("logs"):
-    #     os.mkdir("logs")
-    #
-    # # creating log file
-    # logger = logging.getLogger("Engine-logs")
-    # hdlr = logging.FileHandler(f"logs\\{timestampEND}.log", mode="w")
-    # formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-    # hdlr.setFormatter(formatter)
-    # logger.addHandler(hdlr)
-    # logger.setLevel(logging.INFO)
-
     @staticmethod
     def train(
         train_loader,
