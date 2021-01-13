@@ -10,16 +10,11 @@ My goal is to make my DL work-flow simple, be ultimately customizable and have a
 
 **MyVision** is in it's nascent stages but improving. You're welcome to contribute 😃
 
-## TO-DO
-- [x] Fixed bugs.
-- [x] Added CSVLogger, writes your training metrics to a csv file "metrics.csv"
-- [ ] Add a system of Callbacks
 
 ## Documentation:
 
 Not much actually 😛. But I plan to improve it and add more examples.
-Currently available: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
-OR just go to the `examples` folder.
+Currently available: [MNIST-example](https://mybinder.org/v2/gh/Abhiswain97/MyVision/master)
 
 ## Download:
 
