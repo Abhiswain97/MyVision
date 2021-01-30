@@ -11,7 +11,7 @@ if __name__ == "__main__":
     setup(
         name="MyVision",
         version=MyVision.__version__,
-        description="MyTorch: Collection of things I love about PyTorch",
+        description="MyVision: Customizability meets abstraction",
         long_description=long_description,
         long_description_content_type="text/markdown",
         author="Abhishek Swain",

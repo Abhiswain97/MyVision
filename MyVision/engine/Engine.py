@@ -52,6 +52,8 @@ class Trainer(object):
 
             losses.update(val=loss.item(), n=images.size(0))
 
+            sys.stdout.flush()
+
         return losses.avg
 
     @staticmethod
@@ -79,6 +81,8 @@ class Trainer(object):
             gts = chain(gts, targets.detach().cpu().numpy())
 
             losses.update(val=loss.item(), n=images.size(0))
+
+            sys.stdout.flush()
 
         return np.array(list(predictions)), np.array(list(gts)), losses.avg
 
@@ -129,7 +133,9 @@ class Trainer(object):
                 timestampDate = time.strftime("%d%m%Y")
                 timestampEND = timestampDate + "-" + timestampTime
 
-                print(f"[SAVING] to {checkpoint_path}\\model-[{timestampEND}].pt")
+                print(
+                    f"[SAVING] to {checkpoint_path}\\model-[{timestampEND}]-{epoch + 1}.pt and a best_model.pt"
+                )
                 torch.save(
                     {
                         "model": model,
@@ -137,8 +143,10 @@ class Trainer(object):
                         "best_loss": best_loss,
                         "best_epoch": epoch,
                     },
-                    f"{checkpoint_path}\\model-[{timestampEND}].pt",
+                    f"{checkpoint_path}\\model-[{timestampEND}]-{epoch + 1}.pt",
                 )
+
+                torch.save(model, "best_model.pt")
 
                 best_loss = valid_loss
 
@@ -197,10 +205,14 @@ class Trainer(object):
                     tablefmt="pretty",
                 )
             )
-
+            sys.stdout.flush()
             if lr_scheduler:
                 lr_scheduler.step(score)
 
-            print(f"Epoch completed in: {(time.time() - start_time) / 60} mins")
+            print(
+                f"Epoch completed in: {round((time.time() - start_time) / 60, 2)} mins"
+            )
 
-        print(f"Training completed in {(time.time() - train_start_time) / 60} mins")
+        print(
+            f"Training completed in {round((time.time() - train_start_time) / 60, 2)} mins"
+        )

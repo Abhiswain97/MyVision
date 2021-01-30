@@ -16,10 +16,23 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class DatasetUtils(object):
     """
     This class contains utilities for making a PyTorch Dataset.
-    """ 
+    """
 
     @staticmethod
     def splitter(train_df=None, image_paths=None, targets=None, valid_size=0.25):
+
+        """
+        Function to split the dataset. Takes in a pandas dataframe and splits
+        into training and validation sets.
+
+        :param train_df: pd.Dataframe of the training file
+        :param image_paths: column name containing image paths
+        :param targets: column name containing targets
+        :param valid_size: sets the split size
+
+        :returns:
+            train images, train labels, validation images, validation labels
+        """
 
         if isinstance(train_df, pd.DataFrame):
             train_images, valid_images, train_labels, valid_labels = train_test_split(
@@ -38,7 +51,10 @@ class DatasetUtils(object):
 
         else:
             train_images, valid_images, train_labels, valid_labels = train_test_split(
-                image_paths, targets, test_size=valid_size, random_state=42,
+                image_paths,
+                targets,
+                test_size=valid_size,
+                random_state=42,
             )
 
             return (
@@ -121,11 +137,8 @@ class SimpleDataset(Dataset):
         self.image_paths = image_paths
         self.targets = targets
         self.default_aug = albumentations.Compose(
-            [
-                albumentations.Normalize(),
-                ToTensorV2()
-            ]
-        ) 
+            [albumentations.Normalize(), ToTensorV2()]
+        )
         self.transform = transform
 
     def __getitem__(self, index: int):
@@ -138,7 +151,7 @@ class SimpleDataset(Dataset):
         augmented_image = self.default_aug(image=np.array(image))
 
         return (
-            torch.tensor(augmented_image['image']),
+            torch.tensor(augmented_image["image"]),
             torch.tensor(label),
         )
 
@@ -154,26 +167,22 @@ class PascalVOCDataset(Dataset):
         self.boxes = boxes
         self.targets = targets
         self.default_aug = albumentations.Normalize()
-        
+
     def __getitem__(self, idx):
         image = Image.open(self.df[self.image_paths][idx])
         box = self.df[self.boxes].astype(np.float32)[idx]
         class_ = self.df[self.targets].astype(np.float32)[idx]
-        
+
         if self.transform:
             image = self.transform(image)
 
         augmented_image = self.default_aug(image=np.array(image))
-    
+
         box = torch.as_tensor(box, dtype=torch.float32)
         class_ = torch.as_tensor(class_, dtype=torch.float32)
-        
-        return {
-            "image": image,
-            "box": box,
-            "class": class_
-        }
-    
+
+        return {"image": image, "box": box, "class": class_}
+
     def __len__(self):
         return len(self.df)
 
@@ -190,10 +199,7 @@ class CVDataset(Dataset):
         self.image_paths = image_paths
         self.targets = targets
         self.default_aug = albumentations.Compose(
-            [
-                albumentations.Normalize(),
-                ToTensorV2()
-            ]
+            [albumentations.Normalize(), ToTensorV2()]
         )
 
     def __getitem__(self, idx):
@@ -214,7 +220,7 @@ class CVDataset(Dataset):
         augmented_image = self.default_aug(image=np.array(image))
 
         return (
-            torch.tensor(augmented_image['image']),
+            torch.tensor(augmented_image["image"]),
             torch.tensor(label),
         )
 
