@@ -1,4 +1,5 @@
-[![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision) ![Upload Python Package](https://github.com/Abhiswain97/MyVision/workflows/Upload%20Python%20Package/badge.svg) [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision) [![Downloads](https://pepy.tech/badge/myvision)](https://pepy.tech/project/myvision)
+[![HitCount](http://hits.dwyl.com/Abhiswain97/MyVision.svg)](http://hits.dwyl.com/Abhiswain97/MyVision) ![Upload Python Package](https://github.com/Abhiswain97/MyVision/workflows/Upload%20Python%20Package/badge.svg) [![PyPI version](https://badge.fury.io/py/MyVision.svg)](https://badge.fury.io/py/MyVision) 
+[![Downloads](https://static.pepy.tech/personalized-badge/myvision?period=total&units=abbreviation&left_color=black&right_color=blue&left_text=Downloads)](https://pepy.tech/project/myvision)
 
 # MyVision: Customizability meets abstraction
 
